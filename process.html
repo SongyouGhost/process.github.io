@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital@1&display=swap">
+  </head>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: black;
+      cursor: crosshair;
+    }
+  </style>
+  <body>
+    <script>
+    let seconds = []; //方塊函數
+    let points = []; // 儲存點的陣列
+
+    //繪製垂直線段
+    class Line {
+        constructor(x, y, speed) {
+          this.x = x;
+          this.y = 100;
+          this.speed = speed;
+        }
+
+        update() {
+          this.x += this.speed;
+
+          if (this.x > width) {
+            this.x = 0;
+            this.speed = random(3, 2);
+          }
+        }
+
+        display() {
+          stroke(180);
+          strokeWeight(0.5);
+          line(this.x, this.y, this.x, height);
+        }
+      }
+
+      let lines = [];
+      let spacing = 20;
+
+    //文字排版
+    class GraphicsText {
+        constructor() {
+          this.titleColor = [217, 51, 50];
+          this.subtitleItalic = true;
+        }
+      
+        display() {
+          this.displayTitle();
+          this.displaySubtitles();
+        }
+      
+        displayTitle() {
+          textSize(windowWidth * 0.2);
+          textAlign(CENTER, TOP);
+          textStyle(NORMAL);
+          fill(this.titleColor);
+          text("PROCESS", width / 2, 10);
+        }
+      
+        displaySubtitles() {
+          textAlign(LEFT, BASELINE);
+          textStyle(NORMAL);
+          textSize(windowWidth * 0.02);
+          text("a reference process for", windowWidth / 3, height - (windowWidth / 60) * 2);
+          text("thinking about", windowWidth / 3, height - (windowWidth / 60));
+          text("graphic design", (windowWidth * 2) / 3, height - (windowWidth / 60) * 2);
+          text("through midjourney.", (windowWidth * 2) / 3, height - (windowWidth / 60));
+          textStyle(ITALIC);
+        textSize(windowWidth * 0.04);
+        text("What?", 20, height - (windowWidth / 60));
+        }
+      }
+
+      let graphicsText;
+
+      function setup() {
+        createCanvas(windowWidth, windowHeight);
+        textFont('Libre Caslon Text');
+        graphicsText = new GraphicsText();
+        initializeLines(); //繪製線段
+      }
+
+      function initializeLines() {
+        lines = [];
+        for (let x = 0; x < width; x += spacing) {
+          lines.push(new Line(x, 0, random(3, 2)));
+        }
+      }
+
+      function draw() {
+        background(5);
+
+        //繪製線段
+        for (let i = 0; i < lines.length; i++) {
+            lines[i].update();
+            lines[i].display();
+          }
+
+          strokeWeight(0);
+        graphicsText.display(); //文字排版
+        
+
+        // 更新並繪製每個數秒方塊
+        for (let i = 0; i < seconds.length; i++) {
+          seconds[i].update();
+          seconds[i].display();
+        }
+      
+        // 在每秒的機率下新增一個數秒方塊
+        if (random() < 10) {
+          seconds.push(new RandomSecond());
+        }
+      
+        // 清除已經存在一段時間的數秒方塊
+        for (let i = seconds.length - 1; i >= 0; i--) {
+          if (seconds[i].timer <= 0) {
+            seconds.splice(i, 1);
+          }
+        }
+
+        //繪製線條
+        for (let i = 0; i < points.length; i++) {
+            noStroke();
+            fill(217, 51 ,50);
+            //circle(points[i].x, points[i].y, 10);
+        
+            if (i > 0) {
+                // 繪製線段
+                let prevPoint = points[i - 1];
+                let currentPoint = points[i];
+                strokeWeight(2);
+                stroke(217, 51 ,50);
+                line(prevPoint.x, prevPoint.y, currentPoint.x, currentPoint.y);
+                strokeWeight(0);
+              }
+          }
+      }
+
+      function mouseDragged() {
+        // 當滑鼠按住並移動時觸發這個函式
+        // 可以在這裡繪製圖形或進行其他操作
+      
+        // 繪製一個點並將其加入陣列中
+        points.push({ x: mouseX, y: mouseY });
+      }
+
+      
+      
+
+      //方塊
+      class RandomSecond {
+        constructor() {
+          this.x = random(width); // 隨機 X 位置
+          this.y = random(height); // 隨機 Y 位置
+          this.width = random(10, 100); // 隨機寬度
+          this.height = random(10, 100); // 隨機高度
+          this.color = random(10, 255); // 隨機灰階顏色
+          this.speed = random(0.1, 1); // 隨機速度
+          this.timer = floor(random(0.1, 1.2)); // 隨機計時器，決定方塊存在的時間
+        }
+      
+        update() {
+          this.y += this.speed; // 每次更新位置時 Y 值增加
+          this.timer -= 1 / frameRate(); // 每次更新計時器減去每幀的時間
+        }
+      
+        display() {
+          noStroke();
+          fill(this.color); // 設定填充顏色為隨機灰階
+          rect(this.x, this.y, this.width, this.height);
+        }
+      }
+      function windowResized() {
+        resizeCanvas(windowWidth, windowHeight);
+      }
+    </script>
+  </body>
+</html>
